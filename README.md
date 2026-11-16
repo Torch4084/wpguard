@@ -78,15 +78,29 @@ of one rule including how to fix it and where to read more.
 
 ## Install
 
+Grab a prebuilt binary for Linux, macOS or Windows from the
+[releases page](https://github.com/Torch4084/wpguard/releases):
+
 ```bash
-cargo install --locked wpguard
+# Linux
+curl -sSL -o wpguard.tar.gz \
+  https://github.com/Torch4084/wpguard/releases/latest/download/wpguard-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
+tar xzf wpguard.tar.gz
+sudo install wpguard-v0.1.0-x86_64-unknown-linux-gnu/wpguard /usr/local/bin/wpguard
 ```
 
-Or grab a prebuilt binary for Linux, macOS and Windows from the
-[releases page](https://github.com/Torch4084/wpguard/releases).
+Or build it from source with a stable Rust toolchain:
+
+```bash
+cargo install --locked --git https://github.com/Torch4084/wpguard
+```
 
 There is no runtime dependency: no PHP, no WordPress, no Node. The analyzer is a
 single static binary and it never executes the code it inspects.
+
+```bash
+wpguard --version
+```
 
 ## Use
 

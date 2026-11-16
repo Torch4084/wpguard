@@ -42,9 +42,14 @@ runs:
         WANTED_VERSION: ${{ inputs.version }}
       run: |
         set -euo pipefail
+        case "$(uname -m)" in
+          x86_64|amd64) arch="x86_64" ;;
+          arm64|aarch64) arch="aarch64" ;;
+          *) echo "unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+        esac
         case "$(uname -s)" in
-          Linux)   target="x86_64-unknown-linux-gnu" ;;
-          Darwin)  target="aarch64-apple-darwin" ;;
+          Linux)  target="${arch}-unknown-linux-gnu" ;;
+          Darwin) target="${arch}-apple-darwin" ;;
           *) echo "unsupported platform: $(uname -s)" >&2; exit 1 ;;
         esac
         version="${WANTED_VERSION#v}"
