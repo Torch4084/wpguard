@@ -39,6 +39,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A manual dispatch builds the tag it was given, so that the
+          # binaries always match the commit the tag points at.
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Install the Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -52,6 +56,20 @@ jobs:
       - name: Install cross for the Linux targets
         if: matrix.os == 'ubuntu-latest'
         uses: taiki-e/install-action@cross
+
+      - name: Verify the checkout matches the tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          actual="$(git rev-parse HEAD)"
+          tagged="$(git rev-list -n 1 "$tag" 2>/dev/null || echo '')"
+          echo "tag   $tag -> ${tagged:-unknown}"
+          echo "built $actual"
+          if [ -n "$tagged" ] && [ "$tagged" != "$actual" ]; then
+            echo "::error::the checked out commit does not match the tag, refusing to publish"
+            exit 1
+          fi
 
       - name: Build
         shell: bash
@@ -112,5 +130,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          commitish: ${{ github.event.inputs.tag || github.ref_name }}
           generate_release_notes: true
           files: dist/*
