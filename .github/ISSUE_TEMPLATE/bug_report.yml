@@ -1,0 +1,68 @@
+name: Bug report
+description: Something in wpguard does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report this.
+
+        If you are reporting a **false positive**, the rule that fired is the
+        most important part of the report. Please include the smallest snippet
+        that still triggers it.
+  - type: input
+    id: version
+    attributes:
+      label: wpguard version
+      description: The output of `wpguard --version`
+      placeholder: wpguard 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of problem is this?
+      options:
+        - False positive
+        - False negative
+        - Crash or hang
+        - Wrong output
+        - Documentation
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: rule
+    attributes:
+      label: Rule identifier
+      description: If a rule fired, which one?
+      placeholder: WP010
+  - type: textarea
+    id: snippet
+    attributes:
+      label: Smallest snippet that reproduces the problem
+      description: PHP is enough, no need for a whole plugin.
+      render: php
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead?
+      description: The full output is best.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Ubuntu 24.04
+    validations:
+      required: true

@@ -1,0 +1,40 @@
+name: False positive
+description: A rule fires on code that is not vulnerable
+labels: [false-positive]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        False positives are treated as bugs, not as noise. The snippet you
+        provide here becomes a regression test, so please make it as small as
+        possible while still triggering the rule.
+  - type: input
+    id: rule
+    attributes:
+      label: Rule identifier
+      description: The rule that fired.
+      placeholder: WP001
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: wpguard version
+      placeholder: wpguard 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: snippet
+    attributes:
+      label: The snippet that triggers the rule
+      description: Include the handler, the hook registration, or whatever the rule needs to see.
+      render: php
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is this code safe?
+      description: What does the code do that makes the finding unnecessary?
+    validations:
+      required: true

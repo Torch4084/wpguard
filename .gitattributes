@@ -1,0 +1,22 @@
+# Normalise line endings so that the same files work on every platform.
+* text=auto eol=lf
+
+# Windows specific scripts.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files.
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Lock files are committed as they are.
+Cargo.lock -diff

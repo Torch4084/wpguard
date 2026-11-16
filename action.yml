@@ -1,0 +1,83 @@
+name: wpguard
+description: Static security analyzer for WordPress plugins and themes
+author: Torch4084
+
+branding:
+  icon: shield
+  color: orange
+
+inputs:
+  path:
+    description: The path to scan.
+    required: false
+    default: "."
+  severity:
+    description: The lowest severity to report (low, medium, high, critical).
+    required: false
+    default: "low"
+  version:
+    description: The version of wpguard to install. Use "latest" for the newest release.
+    required: false
+    default: "latest"
+  sarif:
+    description: Where to write the SARIF report. Leave empty to skip it.
+    required: false
+    default: "wpguard.sarif"
+  fail-on-findings:
+    description: Fail the step when a finding is reported.
+    required: false
+    default: "true"
+
+outputs:
+  sarif:
+    description: The path of the SARIF report that was written.
+    value: ${{ inputs.sarif }}
+
+runs:
+  using: composite
+  steps:
+    - name: Install wpguard
+      shell: bash
+      env:
+        WANTED_VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        case "$(uname -s)" in
+          Linux)   target="x86_64-unknown-linux-gnu" ;;
+          Darwin)  target="aarch64-apple-darwin" ;;
+          *) echo "unsupported platform: $(uname -s)" >&2; exit 1 ;;
+        esac
+        version="${WANTED_VERSION#v}"
+        if [ "${WANTED_VERSION}" = "latest" ]; then
+          version="$(curl -sSfL https://api.github.com/repos/Torch4084/wpguard/releases/latest \
+            | grep '"tag_name"' \
+            | head -n1 \
+            | cut -d'"' -f4)"
+          version="${version#v}"
+        fi
+        url="https://github.com/Torch4084/wpguard/releases/download/v${version}/wpguard-v${version}-${target}.tar.gz"
+        work="$(mktemp -d)"
+        curl -sSfL "$url" -o "$work/wpguard.tar.gz"
+        tar -xzf "$work/wpguard.tar.gz" -C "$work"
+        install -m 0755 "$work/wpguard-v${version}-${target}/wpguard" "$HOME/.cargo/bin/wpguard"
+        "$HOME/.cargo/bin/wpguard" --version
+
+    - name: Run wpguard
+      shell: bash
+      env:
+        SARIF: ${{ inputs.sarif }}
+        FAIL_ON_FINDINGS: ${{ inputs.fail-on-findings }}
+      run: |
+        set -euo pipefail
+        args=(scan "${{ inputs.path }}" --severity "${{ inputs.severity }}")
+        if [ -n "${SARIF}" ]; then
+          args+=(--format sarif --output "${SARIF}")
+        else
+          args+=(--format console)
+        fi
+        status=0
+        "$HOME/.cargo/bin/wpguard" "${args[@]}" || status=$?
+        if [ "${FAIL_ON_FINDINGS}" = "true" ] && [ "${status}" -eq 1 ]; then
+          exit 1
+        fi
+        exit "${status}"

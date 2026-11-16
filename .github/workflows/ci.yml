@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install the Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache the build directory
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: cargo-${{ matrix.os }}
+
+      - name: Check the formatting
+        run: cargo fmt --all --check
+
+      - name: Run clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Run the test suite
+        run: cargo test --all --all-features
+
+  smoke:
+    name: End to end smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build the release binary
+        run: cargo build --release
+
+      - name: The clean fixture must produce no findings
+        run: ./target/release/wpguard scan tests/fixtures/clean-plugin
+
+      - name: The vulnerable fixture must produce findings
+        run: |
+          set -euo pipefail
+          ./target/release/wpguard scan tests/fixtures/vulnerable-plugin --format sarif --output wpguard.sarif || status=$?
+          if [ "${status:-0}" -ne 1 ]; then
+            echo "expected exit status 1, got ${status:-0}"
+            exit 1
+          fi
+          test -s wpguard.sarif
+          grep -q '"version": "2.1.0"' wpguard.sarif
+
+      - name: Upload the SARIF report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wpguard-sarif
+          path: wpguard.sarif
+          retention-days: 14
+          if-no-files-found: warn

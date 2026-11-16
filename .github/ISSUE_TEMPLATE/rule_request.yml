@@ -1,0 +1,44 @@
+name: Rule request
+description: Suggest a defect class that wpguard should detect
+labels: [enhancement]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What should wpguard detect?
+      description: One paragraph is enough.
+    validations:
+      required: true
+  - type: input
+    id: cwe
+    attributes:
+      label: CWE
+      description: The weakness this belongs to, if there is one.
+      placeholder: CWE-862
+  - type: textarea
+    id: example
+    attributes:
+      label: Example of vulnerable code
+      description: A short snippet in the style of a real plugin.
+      render: php
+    validations:
+      required: true
+  - type: textarea
+    id: safe
+    attributes:
+      label: Example of the correct way to write it
+      description: The rule must stay quiet on this.
+      render: php
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: What severity should the rule have?
+      options:
+        - low
+        - medium
+        - high
+        - critical
+    validations:
+      required: true

@@ -1,0 +1,22 @@
+# Example configuration for wpguard.
+#
+# Copy this file to `wpguard.toml` next to your plugin and adjust it.
+# Every setting can be overridden on the command line.
+
+# The lowest severity to report. One of low, medium, high, critical.
+severity = "medium"
+
+# Only run these rules. Remove this to run all of them.
+# rules = ["WP001", "WP003", "WP010"]
+
+# Never run these rules.
+exclude = []
+
+# Directories to skip while walking the tree.
+exclude_paths = ["vendor", "node_modules", "build"]
+
+# Which file extensions to scan.
+extensions = [".php", ".inc", ".phtml"]
+
+# A baseline file whose findings are treated as already accepted.
+# baseline = ".wpguard-baseline.json"
