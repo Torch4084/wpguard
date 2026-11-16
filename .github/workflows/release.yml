@@ -54,6 +54,7 @@ jobs:
         uses: taiki-e/install-action@cross
 
       - name: Build
+        shell: bash
         run: |
           if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
             cross build --release --target ${{ matrix.target }}
