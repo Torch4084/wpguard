@@ -37,8 +37,10 @@ between a hook, the callback behind it, and what that callback does.
 ```
 $ wpguard scan acme-forms/
 
+wpguard · scanned 1 file(s) in 6 ms
+
 acme-forms.php
-  17:3  HIGH  WP001  Unauthenticated AJAX action without a nonce check
+  17:3 HIGH WP001  Unauthenticated AJAX action without a nonce check
     add_action( 'wp_ajax_nopriv_acme_import', array( $this, 'handle_import' ) );
     `acme_import` is registered for unauthenticated visitors and its handler does
     not verify a nonce, so any third party site can trigger it.
@@ -47,7 +49,16 @@ acme-forms.php
     fix: Call `check_ajax_referer( 'my-action', 'nonce' )` at the top of the handler,
     and require a capability with `current_user_can()` if the action should only be
     available to logged in users.
+  23:3 HIGH WP006  admin_post handler without a capability check
+    add_action( 'admin_post_nopriv_acme_save', array( $this, 'handle_save' ) );
+    `admin_post_nopriv_acme_save` is registered for any visitor, including logged out
+    ones and its handler performs no capability check.
+    in Acme_Forms::register
 ```
+
+The hook name alone does not tell you much. The useful part is the second
+half: wpguard followed the hook to the method behind it, looked inside that
+method, and found that it never asks who is calling.
 
 ## What it looks for
 
