@@ -73,15 +73,23 @@ jobs:
             binary="${binary}.exe"
           fi
           name="wpguard-v${version}-${{ matrix.target }}"
-          mkdir -p "dist/$name"
-          cp "$binary" "dist/$name/"
-          cp README.md LICENSE "dist/$name/"
-          cd dist
+          rm -rf "dist/${name}"
+          mkdir -p "dist/${name}"
+          cp "$binary" "dist/${name}/"
+          cp README.md LICENSE "dist/${name}/"
           if [ "${{ matrix.archive }}" = "zip" ]; then
-            zip -r "${name}.zip" "$name"
+            # The Windows runners have no zip binary, but they do have Python.
+            if command -v python >/dev/null 2>&1; then
+              python -c "import shutil,sys; shutil.make_archive(sys.argv[1], 'zip', root_dir=sys.argv[2], base_dir=sys.argv[3])" \
+                "dist/${name}" "dist" "$name"
+            else
+              python3 -c "import shutil,sys; shutil.make_archive(sys.argv[1], 'zip', root_dir=sys.argv[2], base_dir=sys.argv[3])" \
+                "dist/${name}" "dist" "$name"
+            fi
           else
-            tar -czf "${name}.tar.gz" "$name"
+            tar -czf "dist/${name}.tar.gz" -C dist "$name"
           fi
+          ls -la dist
 
       - uses: actions/upload-artifact@v4
         with:

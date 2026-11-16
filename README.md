@@ -93,14 +93,16 @@ Grab a prebuilt binary for Linux, macOS or Windows from the
 [releases page](https://github.com/Torch4084/wpguard/releases):
 
 ```bash
-# Linux
+# Linux, x86_64
 curl -sSL -o wpguard.tar.gz \
-  https://github.com/Torch4084/wpguard/releases/latest/download/wpguard-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
+  https://github.com/Torch4084/wpguard/releases/download/v0.1.0/wpguard-v0.1.0-x86_64-unknown-linux-gnu.tar.gz
 tar xzf wpguard.tar.gz
 sudo install wpguard-v0.1.0-x86_64-unknown-linux-gnu/wpguard /usr/local/bin/wpguard
 ```
 
-Or build it from source with a stable Rust toolchain:
+The archive names carry the version, so check the
+[releases page](https://github.com/Torch4084/wpguard/releases) for the current
+one. Or build it from source with a stable Rust toolchain:
 
 ```bash
 cargo install --locked --git https://github.com/Torch4084/wpguard
